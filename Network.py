@@ -121,7 +121,6 @@ class Network(nn.Module):
 
     def forward_fusion(self, xs,args):
         hs = []
-        weights = []
         adjs = []
 
         for v in range(self.view):
@@ -133,16 +132,7 @@ class Network(nn.Module):
             hs.append(h)
 
 
-
-        corr_matrix = compute_correlation_matrix(hs)
-
-        for v in range(self.view):
-            corr_sum = torch.sum(corr_matrix[v, :]) + 1e-8
-            weight = 1 / corr_sum
-            weights.append(weight)
-        weights = torch.nn.functional.softmax(torch.tensor(weights), dim=0)
-        weighted_hs = [hs[v] * weights[v] for v in range(self.view)]
-        normalized_hs = [normalize(h, dim=1) for h in weighted_hs]
+        normalized_hs = [normalize(h, dim=1) for h in hs]
 
 
         cat_feautre = torch.cat(normalized_hs, dim=1)

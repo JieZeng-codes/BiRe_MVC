@@ -19,7 +19,7 @@ print(torch.__version__)
 print(torch.cuda.is_available())
 print(torch.cuda.get_device_name())
 
-Dataname = 'BBC'
+Dataname = 'BBCSport'
 parser = argparse.ArgumentParser(description='train')
 parser.add_argument('--dataset', default=Dataname)
 parser.add_argument('--batch_size', default=256, type=int)
@@ -190,10 +190,9 @@ def pretrain(epoch):
         optimizer.zero_grad()
         xrs, hs, f = model(xns)
 
-        # 累积当前批次的视图特征
         for v in range(view):
-            all_hs[v].append(hs[v].detach().cpu())  # 将特征移到CPU并分离梯度
-        # 累积当前批次的标签
+            all_hs[v].append(hs[v].detach().cpu())
+
         all_labels.append(labels.cpu())
 
         loss_list = []
@@ -207,7 +206,7 @@ def pretrain(epoch):
 
     for v in range(view):
         all_hs[v] = torch.cat(all_hs[v], dim=0)
-    # 同样拼接所有批次的标签
+
     all_labels = torch.cat(all_labels, dim=0)
 
     print('Epoch {}'.format(epoch), 'Loss:{:.6f}'.format(tot_loss / len(data_loader)))
@@ -305,29 +304,32 @@ for i in range(T):
 
         fusion, labels, last_model_state_dict ,Loss = model_train(epoch)
 
-        acc_k, nmi_k, ari_k, pur_k, kmeans_vectors, fusion_vector, labels_vector= valid(model, device, dataset, view, data_size, class_num,
-                                                        eval_h=False, args=args)
+        # acc_k, nmi_k, ari_k, pur_k, kmeans_vectors, fusion_vector, labels_vector= valid(model, device, dataset, view, data_size, class_num,
+        #                                                 eval_h=False, args=args)
 
-        avg = (acc_k + nmi_k + ari_k) / 3
-        if avg > best_avg:
-            ac_best = acc_k
-            nm_best = nmi_k
-            ari_best = ari_k
-            best_avg = avg
-            epoch_best = epoch
-            best_fusion_vector = fusion_vector
-            best_labels_vector = labels_vector
-            print(f"Best model saved at epoch {epoch} with ac_best {ac_best}")
+        # avg = (acc_k + nmi_k + ari_k) / 3
+        # if avg > best_avg:
+        #     ac_best = acc_k
+        #     nm_best = nmi_k
+        #     ari_best = ari_k
+        #     best_avg = avg
+        #     epoch_best = epoch
+        #     best_fusion_vector = fusion_vector
+        #     best_labels_vector = labels_vector
+        #     print(f"Best model saved at epoch {epoch} with ac_best {ac_best}")
             # best_model_state_dict = last_model_state_dict
             # torch.save(best_model_state_dict, './models/' + args.dataset + '.pth')
 
         if epoch % 10 == 0:
+            acc_k, nmi_k, ari_k, pur_k, kmeans_vectors, fusion_vector, labels_vector = valid(model, device, dataset,
+                                                                                             view, data_size, class_num,
+                                                                                             eval_h=False, args=args)
             print("Clustering results on kmeans clustering: ")
             print('ACC = {:.4f} NMI = {:.4f} ARI = {:.4f} PUR={:.4f}'.format(acc_k, nmi_k, ari_k, pur_k))
 
         epoch += 1
 
-    print(f"Best model saved at epoch {epoch_best} with ac_best: {ac_best} nm_best:{nm_best} ari_best:{ari_best}")
+    # print(f"Best model saved at epoch {epoch_best} with ac_best: {ac_best} nm_best:{nm_best} ari_best:{ari_best}")
 
     et = time.time()
     elapsed_time = et - st

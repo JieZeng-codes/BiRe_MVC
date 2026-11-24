@@ -8,7 +8,7 @@ import random
 import numpy as np
 
 
-Dataname = 'BDGP'
+Dataname = 'BBCSport'
 parser = argparse.ArgumentParser(description='train')
 parser.add_argument('--dataset', default=Dataname)
 parser.add_argument('--batch_size', default=256, type=int)
@@ -48,15 +48,6 @@ def setup_seed(seed):
     np.random.seed(seed)
     random.seed(seed)
     torch.backends.cudnn.deterministic = True
-
-
-
-if args.dataset== "caltech101":
-    seed = 3
-    setup_seed(seed)
-if args.dataset== "RGB-D":
-    seed = 15
-    setup_seed(seed)
 
 
 
